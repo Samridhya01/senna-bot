@@ -103,25 +103,11 @@ const MethodMobile = process.argv.includes("mobile")
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (texto) => new Promise((resolver) => rl.question(texto, resolver))
 
-let opcion
-if (!fs.existsSync(`./${authFile}/creds.json`) && !methodCodeQR && !methodCode) {
-while (true) {
-opcion = await question("\n\n✳️ Ingrese el metodo de conexion\n🔺 1 : por QR\n🔺 2 : por CÓDIGO\n\n\n")
-if (opcion === '1' || opcion === '2') {
-break
-} else {
-console.log("\n\n🔴 Ingrese solo una opción \n\n 1 o 2\n\n" )
-}}
-opcion = opcion
-}
-
-let opcion = '1'; // Set opcion to '1' directly
-
-// Removed the conditional block and the input prompt
+const opcion = '1'; // Set opcion to '1' directly
 
 const connectionOptions = {
   logger: pino({ level: 'silent' }),
-  printQRInTerminal: opcion === '1' ? true : false,
+  printQRInTerminal: opcion == '1' ? true : false,
   mobile: MethodMobile, 
   browser: [ "Ubuntu", "Chrome", "20.0.04" ], 
   auth: {
@@ -143,26 +129,20 @@ const connectionOptions = {
 
 global.conn = makeWASocket(connectionOptions);
 
-  setTimeout(async () => {
-  let codeBot = await conn.requestPairingCode(addNumber)
-  codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot
-  console.log(chalk.bold.red(`\n\n🟢   Su Código es:  ${codeBot}\n\n`)) 
-  rl.close()
-  }, 3000)
-  }}
-conn.isInit = false
+conn.isInit = false;
 
 if (!opts['test']) {
   setInterval(async () => {
-    if (global.db.data) await global.db.write().catch(console.error)
+    if (global.db.data) await global.db.write().catch(console.error);
     if (opts['autocleartmp']) try {
-      clearTmp()
+      clearTmp();
 
-    } catch (e) { console.error(e) }
-  }, 60 * 1000)
+    } catch (e) { console.error(e); }
+  }, 60 * 1000);
 }
 
-if (opts['server']) (await import('./server.js')).default(global.conn, PORT)
+if (opts['server']) (await import('./server.js')).default(global.conn, PORT);
+
 
 /* Clear */
 async function clearTmp() {

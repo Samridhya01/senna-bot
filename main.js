@@ -115,55 +115,34 @@ console.log("\n\n🔴 Ingrese solo una opción \n\n 1 o 2\n\n" )
 opcion = opcion
 }
 
+let opcion = '1'; // Set opcion to '1' directly
+
+// Removed the conditional block and the input prompt
+
 const connectionOptions = {
   logger: pino({ level: 'silent' }),
-  printQRInTerminal: opcion == '1' ? true : false,
+  printQRInTerminal: opcion === '1' ? true : false,
   mobile: MethodMobile, 
-  //browser: ['Chrome (Linux)', '', ''],
   browser: [ "Ubuntu", "Chrome", "20.0.04" ], 
   auth: {
-  creds: state.creds,
-  keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+    creds: state.creds,
+    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
   },
   markOnlineOnConnect: true, 
   generateHighQualityLinkPreview: true, 
   getMessage: async (clave) => {
-  let jid = jidNormalizedUser(clave.remoteJid)
-  let msg = await store.loadMessage(jid, clave.id)
-  return msg?.message || ""
+    let jid = jidNormalizedUser(clave.remoteJid)
+    let msg = await store.loadMessage(jid, clave.id)
+    return msg?.message || ""
   },
   msgRetryCounterCache,
   msgRetryCounterMap,
   defaultQueryTimeoutMs: undefined,   
   version
-  }
+};
 
-//--
-global.conn = makeWASocket(connectionOptions)
+global.conn = makeWASocket(connectionOptions);
 
-if (opcion === '2' || methodCode) {
-  if (!conn.authState.creds.registered) {  
-  if (MethodMobile) throw new Error('⚠️ Se produjo un Error en la API de movil')
-  
-  let addNumber
-  if (!!phoneNumber) {
-  addNumber = phoneNumber.replace(/[^0-9]/g, '')
-  if (!Object.keys(PHONENUMBER_MCC).some(v => numeroTelefono.startsWith(v))) {
-  console.log(chalk.bgBlack(chalk.bold.redBright("\n\n✴️ Su número debe comenzar  con el codigo de pais")))
-  process.exit(0)
-  }} else {
-  while (true) {
-  addNumber = await question(chalk.bgBlack(chalk.bold.greenBright("\n\n✳️ Escriba su numero\n\nEjemplo: 5491168xxxx\n\n\n\n")))
-  addNumber = addNumber.replace(/[^0-9]/g, '')
-  
-  if (addNumber.match(/^\d+$/) && Object.keys(PHONENUMBER_MCC).some(v => addNumber.startsWith(v))) {
-  break 
-  } else {
-  console.log(chalk.bgBlack(chalk.bold.redBright("\n\n✴️ Asegúrese de agregar el código de país")))
-  }}
- 
-  }
-  
   setTimeout(async () => {
   let codeBot = await conn.requestPairingCode(addNumber)
   codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot
